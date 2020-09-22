@@ -3,20 +3,21 @@ package xml2json
 import (
 	"testing"
 
+	"github.com/emirpasic/gods/maps/linkedhashmap"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAddChild(t *testing.T) {
 	assert := assert.New(t)
 
-	n := Node{}
-	assert.Len(n.Children, 0)
+	n := Node{Children: linkedhashmap.New()}
+	assert.Equal(n.Children.Size(), 0)
 
 	n.AddChild("a", &Node{})
-	assert.Len(n.Children, 1)
+	assert.Equal(n.Children.Size(), 1)
 
 	n.AddChild("b", &Node{})
-	assert.Len(n.Children, 2)
+	assert.Equal(n.Children.Size(), 2)
 }
 
 func TestGetChild(t *testing.T) {

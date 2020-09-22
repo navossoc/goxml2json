@@ -49,12 +49,20 @@ func TestDecodeWithoutDefaultsAndExcludeAttributes(t *testing.T) {
 	err = dec.Decode(root)
 	assert.NoError(err)
 
+	must := func(v interface{}, ok bool) Nodes {
+		return v.(Nodes)
+	}
+
+	osm := must(root.Children.Get("osm"))
+	bounds := must(osm[0].Children.Get("bounds"))
+	minlat := must(bounds[0].Children.Get("minlat"))
+
 	// Check that some attribute`s name has no prefix and has expected value
-	assert.Exactly(root.Children["osm"][0].Children["bounds"][0].Children["minlat"][0].Data, "54.0889580")
+	assert.Exactly(minlat[0].Data, "54.0889580")
 	// Check that some attributes are not present
-	_, exists := root.Children["osm"][0].Children["version"]
+	_, exists := osm[0].Children.Get("version")
 	assert.False(exists)
-	_, exists = root.Children["osm"][0].Children["generator"]
+	_, exists = osm[0].Children.Get("generator")
 	assert.False(exists)
 }
 

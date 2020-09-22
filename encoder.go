@@ -61,8 +61,11 @@ func (enc *Encoder) format(n *Node, lvl int) error {
 		}
 
 		i := 0
-		tot := len(n.Children)
-		for label, children := range n.Children {
+		tot := n.Children.Size()
+		n.Children.Each(func(key interface{}, value interface{}) {
+			label := key.(string)
+			children := value.(Nodes)
+
 			enc.write("\"")
 			enc.write(label)
 			enc.write("\": ")
@@ -87,7 +90,7 @@ func (enc *Encoder) format(n *Node, lvl int) error {
 				enc.write(", ")
 			}
 			i++
-		}
+		})
 
 		enc.write("}")
 	} else {

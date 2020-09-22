@@ -2,11 +2,13 @@ package xml2json
 
 import (
 	"strings"
+
+	"github.com/emirpasic/gods/maps/linkedhashmap"
 )
 
 // Node is a data element on a tree
 type Node struct {
-	Children              map[string]Nodes
+	Children              *linkedhashmap.Map
 	Data                  string
 	ChildrenAlwaysAsArray bool
 }
@@ -18,23 +20,37 @@ type Nodes []*Node
 func (n *Node) AddChild(s string, c *Node) {
 	// Lazy lazy
 	if n.Children == nil {
-		n.Children = map[string]Nodes{}
+		n.Children = linkedhashmap.New()
 	}
 
-	n.Children[s] = append(n.Children[s], c)
+	v, ok := n.Children.Get(s)
+	if !ok {
+		n.Children.Put(s, Nodes{c})
+	} else {
+		n.Children.Put(s, append(v.(Nodes), c))
+	}
 }
 
 // IsComplex returns whether it is a complex type (has children)
 func (n *Node) IsComplex() bool {
-	return len(n.Children) > 0
+	if n.Children == nil {
+		return false
+	}
+	return n.Children.Size() > 0
 }
 
 // GetChild returns child by path if exists. Path looks like "grandparent.parent.child.grandchild"
 func (n *Node) GetChild(path string) *Node {
 	result := n
 	names := strings.Split(path, ".")
+
+	if len(names) > 0 && result.Children == nil {
+		return nil
+	}
+
 	for _, name := range names {
-		children, exists := result.Children[name]
+		v, exists := result.Children.Get(name)
+		children := v.(Nodes)
 		if !exists {
 			return nil
 		}
